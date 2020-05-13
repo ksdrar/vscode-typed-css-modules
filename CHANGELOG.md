@@ -1,7 +1,6 @@
-# Change Log
-All notable changes to the "typed-css-modules-plugin" extension will be documented in this file.
+## [0.3.0]
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-- Initial release
+- Fix extension not working
+- Use dart-sass instead of node-sass
+- Use Prettier instead of Eslint
+- Include all dependencies in extension .vsix

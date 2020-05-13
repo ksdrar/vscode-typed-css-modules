@@ -1,15 +1,16 @@
 {
   "name": "typed-css-modules-plugin",
   "icon": "logo.png",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "license": "MIT",
   "displayName": "CSS Module Typed",
   "description": "Creates .d.ts files from css-modules .css/.less/.scss files",
   "author": "xcodebuild <me@xcodebuild.com>",
   "contributors": [
+    "Jesus R <itsjesusr@outlook.com>",
     "Ignat Awwit <ignatius.awwit@gmail.com>"
   ],
-  "publisher": "awwit",
+  "publisher": "itsjesusr",
   "engines": {
     "vscode": ">=1.32.0"
   },
@@ -21,7 +22,7 @@
     "*"
   ],
   "repository": {
-    "url": "https://github.com/awwit/vscode-typed-css-modules"
+    "url": "https://github.com/KrapK/vscode-typed-css-modules"
   },
   "main": "./out/extension.js",
   "contributes": {

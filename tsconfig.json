@@ -4,14 +4,10 @@
     "target": "es2018",
     "rootDir": "src",
     "outDir": "out",
-    "lib": [
-      "ES2018"
-    ],
+    "lib": ["ES2018"],
     "strict": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "esModuleInterop": true
   },
-  "exclude": [
-    "node_modules",
-    ".vscode-test"
-  ]
+  "exclude": ["node_modules", ".vscode-test"]
 }

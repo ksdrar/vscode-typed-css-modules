@@ -1,130 +1,50 @@
 // eslint-disable-next-line node/no-unpublished-import
-import * as vscode from 'vscode'
-import * as path from 'path'
+import eslint from 'eslint'
 import * as fs from 'fs'
-
 import { isFileEqualBuffer } from 'is-file-equal-buffer'
+import less from 'less'
+import * as sass from 'sass'
+import * as path from 'path'
+import DtsCreator from 'typed-css-modules'
+import * as vscode from 'vscode'
+import { getWorkspacePath } from './utils'
 
-import { resolveLocal, getWorkspacePath } from './utils'
-
-function getGlobalNodeModules(): string {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const childProcess: typeof import('child_process') = require('child_process')
-
-  const isYarn =
-    vscode.workspace.getConfiguration('npm').get<string>('packageManager') ===
-    'yarn'
-
-  return childProcess
-    .execSync(isYarn ? 'yarn global dir' : 'npm root -g')
-    .toString()
-    .trim()
-}
-
-function requireg<T>(packageName: string): T
-function requireg<T>(packageName: string, required: false): T | null
-
-function requireg<T>(packageName: string, required = true): T | null {
-  let packageDir = resolveLocal(packageName)
-
-  if (!packageDir) {
-    const globalNodeModules = getGlobalNodeModules()
-
-    packageDir = path.join(globalNodeModules, packageName)
-
-    if (!fs.existsSync(packageDir)) {
-      if (required) {
-        throw new Error(
-          `vscode-typed-css-modules: Cannot find global module '${packageName}'`
-        )
-      } else {
-        return null
-      }
-    }
-  }
-
-  return require(packageDir)
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let less: any = null
+let eslintEngine: eslint.CLIEngine | null = null
+let dtsCreator: DtsCreator = new DtsCreator()
 
 async function renderLess(code: string): Promise<string> {
-  if (less === undefined) {
-    less = requireg('less')
-  }
-
   const output = await less.render(code)
 
   return output.css
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let sass: any = null
-
-function renderScss(code: string): string {
-  if (sass === undefined) {
-    sass = requireg('node-sass')
-  }
-
-  // @see https://github.com/sass/dart-sass#javascript-api
-  return sass.renderSync(code)
+function renderScss(code: sass.Options): string {
+  return sass.renderSync(code).css.toString()
 }
 
-type DtsCreator = import('typed-css-modules').default
-
-let dtsCreator: DtsCreator | null = null
-
-type Eslint = typeof import('eslint')
-
-/**
- * Search once
- */
+// Search for eslint config once
 let eslintSearch = false
 
-let eslintEngine: import('eslint').CLIEngine | null = null
-
 function renderTypedFile(css: string, filePath: string): Promise<Buffer> {
-  if (dtsCreator === null) {
-    const DtsCreator = requireg<typeof import('typed-css-modules')>(
-      'typed-css-modules'
-    )
-
-    const Factory: {
-      new (): DtsCreator
-    } = Object.prototype.hasOwnProperty.call(DtsCreator, 'default')
-      ? DtsCreator.default
-      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (DtsCreator as any)
-
-    dtsCreator = new Factory()
-  }
-
   if (!eslintSearch && eslintEngine === null) {
-    const eslint = requireg<Eslint>('eslint', false)
-
     eslintSearch = true
 
-    if (eslint !== null) {
-      const workspace = getWorkspacePath(filePath)
+    const workspace = getWorkspacePath(filePath)
 
-      let configFile = vscode.workspace
-        .getConfiguration('eslint.options')
-        .get<string>('configFile')
+    let configFile = vscode.workspace
+      .getConfiguration('eslint.options')
+      .get<string>('configFile')
 
-      if (configFile !== undefined && !path.isAbsolute(configFile)) {
-        configFile = path.resolve(workspace, configFile)
-      }
-
-      try {
-        eslintEngine = new eslint.CLIEngine({
-          cwd: workspace,
-          extensions: ['.ts'],
-          configFile,
-          fix: true,
-        })
-      } catch {}
+    if (configFile !== undefined && !path.isAbsolute(configFile)) {
+      configFile = path.resolve(workspace, configFile)
     }
+
+    eslintEngine = new eslint.CLIEngine({
+      cwd: workspace,
+      extensions: ['.ts'],
+      configFile,
+      fix: true,
+    })
   }
 
   return dtsCreator.create('', css).then(function ({ formatted }) {
@@ -185,7 +105,7 @@ async function getCssContent(extname: string, source: string): Promise<string> {
       return renderLess(source)
 
     case 'scss':
-      return renderScss(source)
+      return renderScss({ data: source })
 
     default:
       return ''
@@ -265,7 +185,6 @@ export function activate(context: vscode.ExtensionContext): void {
 export function deactivate(): void {
   eslintSearch = false
   eslintEngine = null
+  // @ts-ignore
   dtsCreator = null
-  less = null
-  sass = null
 }

@@ -1,15 +1,12 @@
 // eslint-disable-next-line node/no-unpublished-import
-import eslint from 'eslint'
 import * as fs from 'fs'
 import { isFileEqualBuffer } from 'is-file-equal-buffer'
 import less from 'less'
 import * as sass from 'sass'
-import * as path from 'path'
 import DtsCreator from 'typed-css-modules'
 import * as vscode from 'vscode'
-import { getWorkspacePath } from './utils'
+import prettier from 'prettier'
 
-let eslintEngine: eslint.CLIEngine | null = null
 let dtsCreator: DtsCreator = new DtsCreator()
 
 async function renderLess(code: string): Promise<string> {
@@ -22,39 +19,14 @@ function renderScss(code: sass.Options): string {
   return sass.renderSync(code).css.toString()
 }
 
-// Search for eslint config once
-let eslintSearch = false
-
-function renderTypedFile(css: string, filePath: string): Promise<Buffer> {
-  if (!eslintSearch && eslintEngine === null) {
-    eslintSearch = true
-
-    const workspace = getWorkspacePath(filePath)
-
-    let configFile = vscode.workspace
-      .getConfiguration('eslint.options')
-      .get<string>('configFile')
-
-    if (configFile !== undefined && !path.isAbsolute(configFile)) {
-      configFile = path.resolve(workspace, configFile)
-    }
-
-    eslintEngine = new eslint.CLIEngine({
-      cwd: workspace,
-      extensions: ['.ts'],
-      configFile,
-      fix: true,
-    })
-  }
-
+function renderTypedFile(css: string): Promise<Buffer> {
   return dtsCreator.create('', css).then(function ({ formatted }) {
-    if (eslintEngine !== null) {
-      const report = eslintEngine.executeOnText(formatted, filePath)
-
-      return Buffer.from(report.results[0].output || formatted, 'utf-8')
-    }
-
-    return Buffer.from(formatted, 'utf-8')
+    const formattedWithPrettier = prettier.format(formatted, {
+      parser: 'typescript',
+      useTabs: true,
+      singleQuote: true,
+    })
+    return Buffer.from(formattedWithPrettier, 'utf-8')
   })
 }
 
@@ -77,7 +49,7 @@ async function typedCss(
 ): Promise<void> {
   const outputPath = document.uri.fsPath + '.d.ts'
 
-  const typedCode = await renderTypedFile(cssCode, outputPath)
+  const typedCode = await renderTypedFile(cssCode)
 
   await writeFile(outputPath, typedCode)
 
@@ -183,8 +155,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
 // this method is called when your extension is deactivated
 export function deactivate(): void {
-  eslintSearch = false
-  eslintEngine = null
   // @ts-ignore
   dtsCreator = null
 }

@@ -1,3 +1,7 @@
+## [0.3.2]
+
+-   Add setting to disable @type comment requirement
+
 ## [0.3.1]
 
 -   Cleanup code

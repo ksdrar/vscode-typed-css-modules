@@ -1,71 +1,71 @@
 {
-  "name": "typed-css-modules-plugin",
-  "icon": "logo.png",
-  "version": "0.3.0",
-  "license": "MIT",
-  "displayName": "CSS Module Typed",
-  "description": "Creates .d.ts files from css-modules .css/.less/.scss files",
-  "author": "xcodebuild <me@xcodebuild.com>",
-  "contributors": [
-    "Jesus R <itsjesusr@outlook.com>",
-    "Ignat Awwit <ignatius.awwit@gmail.com>"
-  ],
-  "publisher": "itsjesusr",
-  "engines": {
-    "vscode": ">=1.32.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onCommand:extension.cssModuleTyped",
-    "*"
-  ],
-  "repository": {
-    "url": "https://github.com/KrapK/vscode-typed-css-modules"
-  },
-  "main": "./out/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "extension.cssModuleTyped",
-        "title": "CSS Module Typed: Generate .d.ts For CSS Module"
-      }
-    ]
-  },
-  "scripts": {
-    "pub": "vsce publish",
-    "package": "vsce package",
-    "compile": "npx rimraf ./out && npx tsc",
-    "tc": "npx tsc --noEmit",
-    "watch": "npx tsc -watch",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm compile && node ./node_modules/vscode/bin/test"
-  },
-  "dependencies": {
-    "is-file-equal-buffer": "1.0.2",
-    "less": "^3.11.1",
-    "prettier": "^2.0.5",
-    "sass": "^1.26.5",
-    "typed-css-modules": "^0.6.3"
-  },
-  "devDependencies": {
-    "@types/eslint": "6.8.0",
-    "@types/less": "^3.0.1",
-    "@types/mocha": "7.0.2",
-    "@types/node": "13.13.5",
-    "@types/prettier": "^2.0.0",
-    "@types/sass": "^1.16.0",
-    "@typescript-eslint/eslint-plugin": "2.32.0",
-    "@typescript-eslint/parser": "2.32.0",
-    "eslint-config-standard": "14.1.1",
-    "eslint-plugin-import": "2.20.2",
-    "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.0.1",
-    "eslint": "7.0.0",
-    "rimraf": "3.0.2",
-    "typescript": "3.8.3",
-    "vscode": "1.1.37"
-  }
+	"name": "typed-css-modules-plugin",
+	"icon": "logo.png",
+	"version": "0.3.1",
+	"license": "MIT",
+	"displayName": "CSS Module Typed",
+	"description": "Creates .d.ts files from css-modules .css/.less/.scss files",
+	"author": "xcodebuild <me@xcodebuild.com>",
+	"contributors": [
+		"Jesus R <itsjesusr@outlook.com>",
+		"Ignat Awwit <ignatius.awwit@gmail.com>"
+	],
+	"publisher": "itsjesusr",
+	"engines": {
+		"vscode": ">=1.32.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:extension.cssModuleTyped",
+		"*"
+	],
+	"repository": {
+		"url": "https://github.com/KrapK/vscode-typed-css-modules"
+	},
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "extension.cssModuleTyped",
+				"title": "CSS Module Typed: Generate .d.ts For CSS Module"
+			}
+		]
+	},
+	"scripts": {
+		"pub": "vsce publish",
+		"package": "vsce package",
+		"compile": "npx rimraf ./out && npx tsc",
+		"tc": "npx tsc --noEmit",
+		"watch": "npx tsc -watch",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test": "npm compile && node ./node_modules/vscode/bin/test"
+	},
+	"dependencies": {
+		"is-file-equal-buffer": "1.0.2",
+		"less": "^3.11.1",
+		"prettier": "^2.0.5",
+		"sass": "^1.26.5",
+		"typed-css-modules": "^0.6.3"
+	},
+	"devDependencies": {
+		"@types/eslint": "6.8.0",
+		"@types/less": "^3.0.1",
+		"@types/mocha": "7.0.2",
+		"@types/node": "13.13.5",
+		"@types/prettier": "^2.0.0",
+		"@types/sass": "^1.16.0",
+		"@typescript-eslint/eslint-plugin": "2.32.0",
+		"@typescript-eslint/parser": "2.32.0",
+		"eslint-config-standard": "14.1.1",
+		"eslint-plugin-import": "2.20.2",
+		"eslint-plugin-node": "11.1.0",
+		"eslint-plugin-promise": "4.2.1",
+		"eslint-plugin-standard": "4.0.1",
+		"eslint": "7.0.0",
+		"rimraf": "3.0.2",
+		"typescript": "3.8.3",
+		"vscode": "1.1.37"
+	}
 }

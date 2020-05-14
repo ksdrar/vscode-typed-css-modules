@@ -31,7 +31,17 @@
 				"command": "extension.cssModuleTyped",
 				"title": "CSS Module Typed: Generate .d.ts For CSS Module"
 			}
-		]
+		],
+		"configuration": {
+			"title": "CSS Module Typed",
+			"properties": {
+				"cssModuleTyped.setting.requireComment": {
+					"type": "boolean",
+					"default": true,
+					"description": "Require // @type or /* @type */ comment ahead of file to create .d.ts file"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"pub": "vsce publish",

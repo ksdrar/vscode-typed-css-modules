@@ -115,7 +115,11 @@ async function processDocument(
 
 		const content = document.getText();
 
-		if (!TYPE_REGEX.test(content)) {
+		const requireComment = vscode.workspace
+			.getConfiguration('cssModuleTyped.setting')
+			.get('requireComment');
+
+		if (!TYPE_REGEX.test(content) && requireComment) {
 			if (force) {
 				vscode.window.showInformationMessage(
 					'Typed CSS Modules require `// @type` or `/* @type */` ahead of file',

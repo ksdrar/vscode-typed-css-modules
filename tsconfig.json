@@ -1,13 +1,15 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2018",
-    "rootDir": "src",
-    "outDir": "out",
-    "lib": ["ES2018"],
-    "strict": true,
-    "noUnusedLocals": true,
-    "esModuleInterop": true
-  },
-  "exclude": ["node_modules", ".vscode-test"]
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"skipLibCheck": true,
+		"target": "ESNext",
+		"rootDir": "src",
+		"outDir": "out",
+		"lib": ["ESNext"],
+		"strict": true,
+		"noUnusedLocals": true,
+		"esModuleInterop": true
+	},
+	"exclude": ["node_modules", ".vscode-test"]
 }

@@ -1,33 +1,34 @@
-// eslint-disable-next-line node/no-unpublished-import
-import * as fs from 'fs';
+import { writeFile as fsWriteFile } from 'fs';
 import { isFileEqualBuffer } from 'is-file-equal-buffer';
-import less from 'less';
-import * as sass from 'sass';
+import { render as lessRender } from 'less';
+import { format } from 'prettier/standalone';
+import * as parserTS from 'prettier/parser-typescript';
+import { renderSync as sassRenderSync } from 'sass';
 import DtsCreator from 'typed-css-modules';
 import * as vscode from 'vscode';
-import prettier from 'prettier';
 
 let dtsCreator: DtsCreator = new DtsCreator();
 
 // Compile less code to css
 async function renderLess(code: string): Promise<string> {
-	const output = await less.render(code);
+	const output = await lessRender(code);
 
 	return output.css;
 }
 
 // Compile sass code to css
-function renderScss(code: sass.Options): string {
-	return sass.renderSync(code).css.toString();
+function renderScss(code: string): string {
+	return sassRenderSync({ data: code }).css.toString();
 }
 
 // Create .d.ts file and format it using prettier
 function renderTypedFile(css: string): Promise<Buffer> {
 	return dtsCreator.create('', css).then(({ formatted }) => {
-		const formattedWithPrettier = prettier.format(formatted, {
+		const formattedWithPrettier = format(formatted, {
 			parser: 'typescript',
 			useTabs: true,
 			singleQuote: true,
+			plugins: [parserTS],
 		});
 		return Buffer.from(formattedWithPrettier, 'utf-8');
 	});
@@ -37,7 +38,7 @@ function writeFile(path: string, buffer: Buffer): Promise<void> {
 	return isFileEqualBuffer(path, buffer).then((isEqual) => {
 		return !isEqual
 			? new Promise((resolve, reject) => {
-					fs.writeFile(path, buffer, { flag: 'w' }, (err) => {
+					fsWriteFile(path, buffer, { flag: 'w' }, (err) => {
 						err ? reject(err) : resolve();
 					});
 			  })
@@ -81,7 +82,7 @@ async function getCssContent(extname: string, source: string): Promise<string> {
 			return renderLess(source);
 
 		case 'scss':
-			return renderScss({ data: source });
+			return renderScss(source);
 
 		default:
 			return '';

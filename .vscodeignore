@@ -10,5 +10,3 @@ vsc-extension-quickstart.md
 **/*.ts
 .yarn
 node_modules
-!node_modules/less
-!node_modules/typed-css-modules

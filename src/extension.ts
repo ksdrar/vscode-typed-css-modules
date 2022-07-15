@@ -1,24 +1,18 @@
 import { writeFile as fsWriteFile } from 'fs';
 import { isFileEqualBuffer } from 'is-file-equal-buffer';
-import { render as lessRender } from 'less';
-import { format } from 'prettier/standalone';
 import * as parserTS from 'prettier/parser-typescript';
-import { renderSync as sassRenderSync } from 'sass';
+import { format } from 'prettier/standalone';
+import { compileString } from 'sass';
 import DtsCreator from 'typed-css-modules';
 import * as vscode from 'vscode';
 
 let dtsCreator: DtsCreator = new DtsCreator();
 
-// Compile less code to css
-async function renderLess(code: string): Promise<string> {
-	const output = await lessRender(code);
-
-	return output.css;
-}
-
 // Compile sass code to css
 function renderScss(code: string): string {
-	return sassRenderSync({ data: code }).css.toString();
+	const path = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath;
+
+	return compileString(code, { loadPaths: [path ?? ''] }).css;
 }
 
 // Create .d.ts file and format it using prettier
@@ -57,9 +51,7 @@ async function typedCss(
 	await writeFile(outputPath, typedCode);
 
 	if (force) {
-		vscode.window.showInformationMessage(
-			'Typed file created for: ' + document.uri.fsPath,
-		);
+		vscode.window.showInformationMessage('Typed file created for: ' + document.uri.fsPath);
 	}
 }
 
@@ -78,9 +70,6 @@ async function getCssContent(extname: string, source: string): Promise<string> {
 		case 'css':
 			return source;
 
-		case 'less':
-			return renderLess(source);
-
 		case 'scss':
 			return renderScss(source);
 
@@ -89,14 +78,11 @@ async function getCssContent(extname: string, source: string): Promise<string> {
 	}
 }
 
-const supportCss = ['css', 'less', 'scss'];
+const supportCss = ['css', 'scss'];
 
 const TYPE_REGEX = /[\s//*]*@type/;
 
-async function processDocument(
-	document: vscode.TextDocument,
-	force = false,
-): Promise<void> {
+async function processDocument(document: vscode.TextDocument, force = false): Promise<void> {
 	try {
 		const extname = getExtFromPath(document.fileName);
 
@@ -106,9 +92,7 @@ async function processDocument(
 
 		if (!supportCss.includes(extname)) {
 			if (force) {
-				vscode.window.showInformationMessage(
-					'Typed CSS Modules only support .less/.css/.scss',
-				);
+				vscode.window.showInformationMessage('Typed CSS Modules only support .css/.scss');
 			}
 
 			return;
@@ -136,28 +120,23 @@ async function processDocument(
 			await typedCss(cssCode, document, force);
 		}
 	} catch (e) {
-		vscode.window.showWarningMessage(e.toString());
+		vscode.window.showWarningMessage((e as any).toString());
 	}
 }
 
 // This method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): void {
-	const didSave = vscode.workspace.onDidSaveTextDocument(
-		(document: vscode.TextDocument) => {
-			processDocument(document);
-		},
-	);
+	const didSave = vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
+		processDocument(document);
+	});
 
-	const registerCommand = vscode.commands.registerCommand(
-		'extension.cssModuleTyped',
-		() => {
-			if (vscode.window.activeTextEditor !== undefined) {
-				const document = vscode.window.activeTextEditor.document;
-				processDocument(document, true);
-			}
-		},
-	);
+	const registerCommand = vscode.commands.registerCommand('extension.cssModuleTyped', () => {
+		if (vscode.window.activeTextEditor !== undefined) {
+			const document = vscode.window.activeTextEditor.document;
+			processDocument(document, true);
+		}
+	});
 
 	context.subscriptions.push(didSave, registerCommand);
 }

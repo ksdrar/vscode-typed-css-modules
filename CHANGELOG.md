@@ -1,3 +1,9 @@
+## [0.3.4]
+
+- Use esbuild to bundle the extension
+- Include paths to scss
+- Do not format with prettier
+
 ## [0.3.3]
 
 - Use webpack to bundle the extension

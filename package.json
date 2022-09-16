@@ -1,7 +1,7 @@
 {
 	"name": "typed-css-modules-plugin",
 	"icon": "logo.png",
-	"version": "0.3.3",
+	"version": "0.3.4",
 	"license": "MIT",
 	"displayName": "CSS Module Typed",
 	"description": "Creates .d.ts files from css-modules .css/.less/.scss files",
@@ -12,7 +12,7 @@
 	],
 	"publisher": "itsjesusr",
 	"engines": {
-		"vscode": ">=1.68.1"
+		"vscode": ">=1.71.0"
 	},
 	"categories": [
 		"Other"
@@ -25,7 +25,7 @@
 	"repository": {
 		"url": "https://github.com/KrapK/vscode-typed-css-modules"
 	},
-	"main": "./dist/extension.js",
+	"main": "./dist/main.js",
 	"contributes": {
 		"commands": [
 			{
@@ -40,39 +40,44 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Require // @type or /* @type */ comment ahead of file to create .d.ts file"
+				},
+				"cssModuleTyped.setting.includePaths": {
+					"type": "array",
+					"default": [],
+					"description": "Relative paths to include in scss (includes current workspace by default)",
+					"items": {
+						"type": "string"
+					}
 				}
 			}
 		}
 	},
 	"scripts": {
 		"package": "vsce package",
-		"vscode:prepublish": "webpack --mode production",
-		"webpack": "webpack --mode development",
-		"webpack-dev": "webpack --mode development --watch",
-		"webpack-prod": "webpack --mode production"
+		"vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/main.js --external:vscode --format=cjs --platform=node --target=node16",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./"
 	},
 	"dependencies": {
 		"is-file-equal-buffer": "^1.0.4",
-		"prettier": "^2.7.1",
-		"sass": "^1.53.0",
+		"sass": "^1.54.9",
 		"typed-css-modules": "^0.7.2"
 	},
 	"devDependencies": {
-		"@types/node": "18.0.0",
-		"@types/prettier": "^2.6.3",
+		"@types/node": "18.7.18",
 		"@types/sass": "^1.43.1",
-		"@types/vscode": "1.68.1",
-		"@typescript-eslint/eslint-plugin": "^5.30.0",
-		"@typescript-eslint/parser": "^5.30.0",
-		"esbuild": "^0.14.47",
-		"eslint": "^8.18.0",
-		"eslint-config-alloy": "^4.6.0",
+		"@types/vscode": "1.71.0",
+		"@typescript-eslint/eslint-plugin": "^5.37.0",
+		"@typescript-eslint/parser": "^5.37.0",
+		"esbuild": "^0.15.7",
+		"eslint": "^8.23.1",
+		"eslint-config-alloy": "^4.6.2",
 		"rimraf": "^3.0.2",
 		"ts-loader": "^9.3.1",
-		"typescript": "^4.7.4",
-		"vsce": "^2.9.2",
-		"webpack": "^5.73.0",
-		"webpack-cli": "^4.10.0"
+		"typescript": "^4.8.3",
+		"vsce": "^2.11.0"
 	},
 	"dependenciesMeta": {
 		"eslint-config-alloy@3.8.2": {

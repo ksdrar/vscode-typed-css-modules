@@ -1,43 +1,42 @@
 import { writeFile as fsWriteFile } from 'fs';
 import { isFileEqualBuffer } from 'is-file-equal-buffer';
-import * as parserTS from 'prettier/parser-typescript';
-import { format } from 'prettier/standalone';
+import path from 'path';
 import { compileString } from 'sass';
 import DtsCreator from 'typed-css-modules';
 import * as vscode from 'vscode';
 
-let dtsCreator: DtsCreator = new DtsCreator();
+let dtsCreator: DtsCreator = new DtsCreator({ namedExports: true });
 
 // Compile sass code to css
 function renderScss(code: string): string {
-	const path = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath;
+	const workspacePath = vscode.workspace.workspaceFolders?.at(0)!.uri.fsPath as string;
 
-	return compileString(code, { loadPaths: [path ?? ''] }).css;
+	const includePaths = vscode.workspace
+		.getConfiguration('cssModuleTyped.setting')
+		.get('includePaths') as string[];
+
+	const paths = ['.', ...includePaths].map((it) => path.join(workspacePath, it));
+
+	return compileString(code, { loadPaths: paths }).css;
 }
 
-// Create .d.ts file and format it using prettier
-function renderTypedFile(css: string): Promise<Buffer> {
-	return dtsCreator.create('', css).then(({ formatted }) => {
-		const formattedWithPrettier = format(formatted, {
-			parser: 'typescript',
-			useTabs: true,
-			singleQuote: true,
-			plugins: [parserTS],
-		});
-		return Buffer.from(formattedWithPrettier, 'utf-8');
-	});
+// Create .d.ts file
+async function renderTypedFile(css: string): Promise<Buffer> {
+	const { formatted } = await dtsCreator.create('', css);
+
+	return Buffer.from(formatted, 'utf-8');
 }
 
-function writeFile(path: string, buffer: Buffer): Promise<void> {
-	return isFileEqualBuffer(path, buffer).then((isEqual) => {
-		return !isEqual
-			? new Promise((resolve, reject) => {
-					fsWriteFile(path, buffer, { flag: 'w' }, (err) => {
-						err ? reject(err) : resolve();
-					});
-			  })
-			: undefined;
-	});
+async function writeFile(path: string, buffer: Buffer): Promise<void> {
+	const isEqual = await isFileEqualBuffer(path, buffer);
+
+	return !isEqual
+		? new Promise((resolve, reject) => {
+				fsWriteFile(path, buffer, { flag: 'w' }, (err) => {
+					err ? reject(err) : resolve();
+				});
+		  })
+		: undefined;
 }
 
 async function typedCss(
